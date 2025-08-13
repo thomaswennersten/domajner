@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dubbelt Access-System - Dokumentation</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f8ff; 
+            max-width: 900px; 
+            margin: 0 auto; 
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .mode-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .proxy-mode {
+            border-left-color: #28a745;
+        }
+        .direct-mode {
+            border-left-color: #fd7e14;
+        }
+        .success { 
+            color: #155724; 
+            background: #d4edda; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        .info { 
+            color: #0c5460; 
+            background: #d1ecf1; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        .check { color: #28a745; font-weight: bold; }
+        .x { color: #dc3545; font-weight: bold; }
+        code {
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Dubbelt Access-System</h1>
+        
+        <div class="success">
+            <h3>✅ System implementerat och funktionellt!</h3>
+            <p>Nu kan administratörer välja mellan två olika åtkomstlägen för varje tjänst, vilket löser kompatibilitetsproblem med olika typer av webbplatser.</p>
+        </div>
+        
+        <h2>📋 Översikt av de två lägena</h2>
+        
+        <div class="mode-section proxy-mode">
+            <h3>🔒 Proxy Mode (Anonym URL)</h3>
+            <p><strong>Bäst för:</strong> Samarbetsverktyg, Excalidraw, Miro, enkla webbplatser</p>
+            <ul>
+                <li>✅ <strong>Komplett URL-anonymitet</strong> - Riktiga URL:er exponeras aldrig</li>
+                <li>✅ <strong>Säker proxy-implementation</strong> med URL-omskrivning</li>
+                <li>✅ <strong>WebSocket-stöd</strong> för realtidssamarbete</li>
+                <li>✅ <strong>Statiska resurser</strong> laddas korrekt genom proxy</li>
+                <li>⚠️ <strong>Begränsat</strong> för webbplatser med avancerad bot-detektering</li>
+            </ul>
+            <p><strong>URL-format:</strong> <code>/domajner/proxy-full/[token]/</code></p>
+        </div>
+        
+        <div class="mode-section direct-mode">
+            <h3>🔗 Direct Mode (Direktlänk)</h3>
+            <p><strong>Bäst för:</strong> DN.se, kommersiella sajter, sociala medier, streaming</p>
+            <ul>
+                <li>✅ <strong>Fungerar för alla webbplatser</strong> - inga proxy-begränsningar</li>
+                <li>✅ <strong>Full funktionalitet</strong> - alla features fungerar normalt</li>
+                <li>✅ <strong>Snabb åtkomst</strong> - direkt redirect utan mellanlager</li>
+                <li>✅ <strong>Kompatibel</strong> med bot-detektering och säkerhetssystem</li>
+                <li>⚠️ <strong>Riktig URL exponeras</strong> i webbläsarens adressfält</li>
+            </ul>
+            <p><strong>URL-format:</strong> Direktumdirigering till riktiga URL:en</p>
+        </div>
+        
+        <h2>📊 Jämförelse</h2>
+        
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Funktion</th>
+                    <th>🔒 Proxy Mode</th>
+                    <th>🔗 Direct Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>URL-anonymitet</td>
+                    <td class="check">✅ Ja</td>
+                    <td class="x">❌ Nej</td>
+                </tr>
+                <tr>
+                    <td>Fungerar för DN.se</td>
+                    <td class="x">❌ Nej (blockeras)</td>
+                    <td class="check">✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Fungerar för Excalidraw</td>
+                    <td class="check">✅ Ja (perfekt)</td>
+                    <td class="check">✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Live-samarbete</td>
+                    <td class="check">✅ Ja (WebSocket)</td>
+                    <td class="check">✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Token-säkerhet</td>
+                    <td class="check">✅ Ja</td>
+                    <td class="check">✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Engångslänkar</td>
+                    <td class="check">✅ Ja</td>
+                    <td class="check">✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Bot-detektering</td>
+                    <td class="x">❌ Kan blockeras</td>
+                    <td class="check">✅ Inga problem</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>⚙️ Administration</h2>
+        
+        <div class="info">
+            <h4>Hur man konfigurerar accessMode:</h4>
+            <ol>
+                <li>Gå till <strong>Admin-gränssnittet</strong></li>
+                <li>Under <strong>Tjänsthantering</strong>, välj åtkomstläge för varje tjänst</li>
+                <li>Välj <strong>🔒 Proxy Mode</strong> för samarbetsverktyg</li>
+                <li>Välj <strong>🔗 Direct Mode</strong> för kommersiella webbplatser</li>
+                <li>Spara tjänsten</li>
+            </ol>
+        </div>
+        
+        <h3>🔧 Teknisk implementation</h3>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <h4>services.json struktur:</h4>
+            <pre><code>{
+  "id": "service4",
+  "name": "DN",
+  "url": "https://www.dn.se/",
+  "description": "DN",
+  "accessMode": "direct"  // "proxy" eller "direct"
+}</code></pre>
+        </div>
+        
+        <h3>📈 Rekommendationer per tjänsttyp</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4>🔒 Använd Proxy Mode för:</h4>
+                <ul>
+                    <li>Excalidraw / Skiss</li>
+                    <li>Miro</li>
+                    <li>Figma</li>
+                    <li>Enkla webbapplikationer</li>
+                    <li>Open source-verktyg</li>
+                    <li>Utvecklingsverktyg</li>
+                </ul>
+            </div>
+            <div>
+                <h4>🔗 Använd Direct Mode för:</h4>
+                <ul>
+                    <li>DN.se, SVT.se, Aftonbladet</li>
+                    <li>Facebook, Twitter, LinkedIn</li>
+                    <li>YouTube, Netflix</li>
+                    <li>Google Workspace</li>
+                    <li>Microsoft 365</li>
+                    <li>Banking / Finance</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h2>🎯 Resultat</h2>
+        
+        <div class="success">
+            <h4>System fungerar nu för ALLA typer av webbplatser:</h4>
+            <ul>
+                <li>✅ <strong>Excalidraw:</strong> Fungerar perfekt med Proxy Mode (URL-anonymitet behållen)</li>
+                <li>✅ <strong>DN.se:</strong> Fungerar perfekt med Direct Mode (inga proxy-begränsningar)</li>
+                <li>✅ <strong>Säkerhet:</strong> Token-baserad säkerhet fungerar för båda lägena</li>
+                <li>✅ <strong>Flexibilitet:</strong> Admin kan enkelt välja lämpligt läge per tjänst</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.location.href='/'" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                🏠 Tillbaka till huvudsidan
+            </button>
+            <button onclick="window.location.href='admin.html'" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                ⚙️ Administration
+            </button>
+        </div>
+    </div>
+</body>
+</html>

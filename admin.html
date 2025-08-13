@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - E-post Verifiering</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginSection">
+            <h1>Administration - Inloggning</h1>
+            <div class="section">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="password">Administratörslösenord:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit">Logga in</button>
+                </form>
+                <div id="loginMessage"></div>
+            </div>
+        </div>
+
+        <div id="adminSection" style="display: none;">
+            <h1>Administration</h1>
+            
+            <div class="section">
+                <h2>Tjänsthantering</h2>
+                <div class="form-group">
+                    <label>Aktuella tjänster:</label>
+                    <div id="servicesList" style="margin-bottom: 20px;"></div>
+                </div>
+                
+                <!-- Add new service form -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+                    <h3>Lägg till ny tjänst</h3>
+                    <form id="addServiceForm">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label for="newServiceName">Tjänstnamn:</label>
+                                <input type="text" id="newServiceName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newServiceUrl">URL:</label>
+                                <input type="url" id="newServiceUrl" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newServiceDescription">Beskrivning:</label>
+                            <input type="text" id="newServiceDescription">
+                        </div>
+                        <div class="form-group">
+                            <label for="newServiceAccessMode">Åtkomstläge:</label>
+                            <select id="newServiceAccessMode" required>
+                                <option value="proxy">🔒 Proxy Mode (Anonym URL, fungerar för Excalidraw, Miro, etc.)</option>
+                                <option value="direct">🔗 Direct Mode (Direktlänk, fungerar för DN.se, kommersiella sajter)</option>
+                            </select>
+                        </div>
+                        <button type="submit">Lägg till tjänst</button>
+                    </form>
+                </div>
+                
+                <!-- Legacy JSON editor (advanced) -->
+                <details style="margin-top: 20px;">
+                    <summary style="cursor: pointer; color: #666;">🔧 Avancerad redigering (JSON)</summary>
+                    <form id="servicesForm" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="services">Tjänster (JSON-format):</label>
+                            <textarea id="services" name="services" style="height: 200px;" placeholder='[
+  {
+    "id": "service1",
+    "name": "Min Tjänst",
+    "url": "https://example.com/login",
+    "description": "Beskrivning av tjänsten",
+    "accessMode": "proxy"
+  }
+]'></textarea>
+                        </div>
+                        <button type="submit">Spara tjänster</button>
+                        <button type="button" onclick="loadServices()">Ladda nuvarande tjänster</button>
+                    </form>
+                </details>
+                <div id="servicesMessage"></div>
+            </div>
+
+            <div class="section">
+            <h2>Verifieringskod (Ej använd i nuvarande version)</h2>
+            <form id="codeForm">
+                <div class="form-group">
+                    <label for="verificationCode">Ange verifieringskod:</label>
+                    <input type="text" id="verificationCode" name="verificationCode" required>
+                </div>
+                <button type="submit">Spara kod</button>
+            </form>
+            <div id="codeMessage"></div>
+        </div>
+
+        <div class="section">
+            <h2>Tillåtna e-postdomäner</h2>
+            <form id="domainsForm">
+                <div class="form-group">
+                    <label for="domains">Domäner (en per rad):</label>
+                    <textarea id="domains" name="domains" placeholder="exempel.se&#10;företag.com&#10;organisation.org"></textarea>
+                </div>
+                <button type="submit">Spara domäner</button>
+                <button type="button" onclick="loadDomains()">Ladda nuvarande domäner</button>
+            </form>
+            <div id="domainsMessage"></div>
+        </div>
+
+        <div class="section">
+            <h2>Aktiva engångslänkar</h2>
+            <button type="button" onclick="loadLinks()">Uppdatera lista</button>
+            <div id="linksList" style="margin-top: 20px;"></div>
+        </div>
+
+            <div class="back-link">
+                <a href="index.html">Tillbaka till verifiering</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('loginMessage');
+            
+            try {
+                const response = await fetch('/domajner/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('adminSection').style.display = 'block';
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    loadDomains(); // Load domains when admin section becomes visible
+                    loadServices(); // Load services
+                    loadLinks(); // Load active links
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod. Försök igen senare.</div>';
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminSection').style.display = 'block';
+                loadDomains();
+                loadServices();
+                loadLinks();
+            }
+        });
+
+        document.getElementById('codeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('verificationCode').value;
+            const messageDiv = document.getElementById('codeMessage');
+            
+            try {
+                const response = await fetch('/domajner/api/admin/set-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="message success">' + result.message + '</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod. Försök igen senare.</div>';
+            }
+        });
+
+        document.getElementById('domainsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const domains = document.getElementById('domains').value;
+            const messageDiv = document.getElementById('domainsMessage');
+            
+            try {
+                const response = await fetch('/domajner/api/admin/set-domains', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ domains: domains })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="message success">' + result.message + '</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod. Försök igen senare.</div>';
+            }
+        });
+
+        async function loadDomains() {
+            const messageDiv = document.getElementById('domainsMessage');
+            
+            try {
+                const response = await fetch('/domajner/api/admin/get-domains');
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('domains').value = result.domains;
+                    messageDiv.innerHTML = '<div class="message success">Domäner laddade.</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod. Försök igen senare.</div>';
+            }
+        }
+
+        // Services management functions
+        document.getElementById('servicesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const servicesText = document.getElementById('services').value;
+            const messageDiv = document.getElementById('servicesMessage');
+            
+            try {
+                // Validate JSON
+                const services = JSON.parse(servicesText);
+                
+                if (!Array.isArray(services)) {
+                    throw new Error('Tjänster måste vara en array');
+                }
+                
+                const response = await fetch('/domajner/api/admin/set-services', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ services: services })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="message success">' + result.message + '</div>';
+                    loadServices(); // Reload services list
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ogiltig JSON-format: ' + error.message + '</div>';
+            }
+        });
+
+        async function loadServices() {
+            const messageDiv = document.getElementById('servicesMessage');
+            
+            try {
+                const response = await fetch('/domajner/api/admin/get-services');
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('services').value = JSON.stringify(result.services, null, 2);
+                    
+                    // Display services list
+                    const listDiv = document.getElementById('servicesList');
+                    if (result.services.length === 0) {
+                        listDiv.innerHTML = '<p>Inga tjänster konfigurerade.</p>';
+                    } else {
+                        const serviceItems = result.services.map(service => {
+                            const modeIcon = service.accessMode === 'proxy' ? '🔒' : '🔗';
+                            const modeText = service.accessMode === 'proxy' ? 'Proxy Mode' : 'Direct Mode';
+                            const modeColor = service.accessMode === 'proxy' ? '#4caf50' : '#ff9800';
+                            
+                            return `<div style="border: 1px solid #ddd; padding: 15px; margin: 8px 0; border-radius: 4px; position: relative;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 16px;">${service.name}</strong> 
+                                        <span style="color: #666; font-size: 12px;">(${service.id})</span><br>
+                                        <small style="color: #666;">URL: ${service.url}</small><br>
+                                        <small style="color: #666;">${service.description || 'Ingen beskrivning'}</small>
+                                    </div>
+                                    <div style="background: ${modeColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                                        ${modeIcon} ${modeText}
+                                    </div>
+                                </div>
+                                <button onclick="deleteService('${service.id}')" style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; border-radius: 3px; padding: 2px 6px; font-size: 11px; cursor: pointer;">✕</button>
+                            </div>`;
+                        }).join('');
+                        listDiv.innerHTML = serviceItems;
+                    }
+                    
+                    messageDiv.innerHTML = '<div class="message success">Tjänster laddade.</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod. Försök igen senare.</div>';
+            }
+        }
+
+        // Links management functions
+        async function loadLinks() {
+            try {
+                const response = await fetch('/domajner/api/admin/get-links');
+                const result = await response.json();
+                
+                const listDiv = document.getElementById('linksList');
+                
+                if (result.success) {
+                    if (result.links.length === 0) {
+                        listDiv.innerHTML = '<p>Inga aktiva länkar.</p>';
+                    } else {
+                        const linkItems = result.links.map(link => {
+                            const created = new Date(link.createdAt).toLocaleString('sv-SE');
+                            const expires = new Date(link.expiresAt).toLocaleString('sv-SE');
+                            const used = link.used ? `Används: ${new Date(link.usedAt).toLocaleString('sv-SE')}` : 'Ej använd';
+                            const statusColor = link.used ? '#28a745' : '#007bff';
+                            
+                            return `<div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 4px;">
+                                <strong>Token:</strong> ${link.token}<br>
+                                <strong>E-post:</strong> ${link.email}<br>
+                                <strong>Tjänst:</strong> ${link.serviceName}<br>
+                                <strong>Skapad:</strong> ${created}<br>
+                                <strong>Går ut:</strong> ${expires}<br>
+                                <strong style="color: ${statusColor}">Status:</strong> ${used}
+                            </div>`;
+                        }).join('');
+                        listDiv.innerHTML = linkItems;
+                    }
+                } else {
+                    listDiv.innerHTML = '<p style="color: red;">Ett fel uppstod vid hämtning av länkar.</p>';
+                }
+            } catch (error) {
+                document.getElementById('linksList').innerHTML = '<p style="color: red;">Ett fel uppstod. Försök igen senare.</p>';
+            }
+        }
+
+        // Add new service form handler
+        document.getElementById('addServiceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('newServiceName').value;
+            const url = document.getElementById('newServiceUrl').value;
+            const description = document.getElementById('newServiceDescription').value;
+            const accessMode = document.getElementById('newServiceAccessMode').value;
+            const messageDiv = document.getElementById('servicesMessage');
+            
+            try {
+                // Load current services
+                const currentResponse = await fetch('/domajner/api/admin/get-services');
+                const currentResult = await currentResponse.json();
+                
+                if (!currentResult.success) {
+                    throw new Error('Kunde inte ladda aktuella tjänster');
+                }
+                
+                // Generate new service ID
+                const newId = 'service' + (Date.now().toString().slice(-6));
+                
+                // Add new service to list
+                const newService = {
+                    id: newId,
+                    name: name,
+                    url: url,
+                    description: description,
+                    accessMode: accessMode
+                };
+                
+                const updatedServices = [...currentResult.services, newService];
+                
+                // Save updated services
+                const saveResponse = await fetch('/domajner/api/admin/set-services', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ services: updatedServices })
+                });
+                
+                const saveResult = await saveResponse.json();
+                
+                if (saveResult.success) {
+                    messageDiv.innerHTML = '<div class="message success">Tjänst tillagd framgångsrikt!</div>';
+                    // Clear form
+                    document.getElementById('addServiceForm').reset();
+                    // Reload services
+                    loadServices();
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + saveResult.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod: ' + error.message + '</div>';
+            }
+        });
+
+        // Delete service function
+        async function deleteService(serviceId) {
+            if (!confirm('Är du säker på att du vill ta bort denna tjänst?')) {
+                return;
+            }
+            
+            const messageDiv = document.getElementById('servicesMessage');
+            
+            try {
+                // Load current services
+                const currentResponse = await fetch('/domajner/api/admin/get-services');
+                const currentResult = await currentResponse.json();
+                
+                if (!currentResult.success) {
+                    throw new Error('Kunde inte ladda aktuella tjänster');
+                }
+                
+                // Remove service from list
+                const updatedServices = currentResult.services.filter(service => service.id !== serviceId);
+                
+                // Save updated services
+                const saveResponse = await fetch('/domajner/api/admin/set-services', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ services: updatedServices })
+                });
+                
+                const saveResult = await saveResponse.json();
+                
+                if (saveResult.success) {
+                    messageDiv.innerHTML = '<div class="message success">Tjänst borttagen framgångsrikt!</div>';
+                    // Reload services
+                    loadServices();
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + saveResult.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod: ' + error.message + '</div>';
+            }
+        }
+
+        // Load domains when page loads (removed - now handled by login logic)
+    </script>
+</body>
+</html>

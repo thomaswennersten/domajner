@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy-begränsningar och kompatibilitet</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f8ff; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .warning { 
+            color: #e65100; 
+            background: #fff3e0; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0;
+            border-left: 4px solid #ff9800;
+        }
+        .success { 
+            color: #2e7d32; 
+            background: #e8f5e8; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .info { 
+            color: #0c5460; 
+            background: #d1ecf1; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Proxy-begränsningar och kompatibilitet</h1>
+        
+        <div class="warning">
+            <h3>⚠️ Viktigt: DN.se blockerar proxy-åtkomst</h3>
+            <p><strong>DN.se (Dagens Nyheter) använder avancerad bot-detektering som blockerar åtkomst via proxy-servrar.</strong></p>
+            <p>Detta är <strong>inte ett fel i vårt system</strong> - det är DN.se:s säkerhetspolicy för att förhindra automatiserad åtkomst.</p>
+        </div>
+        
+        <h2>🚦 Tjänst-kompatibilitet</h2>
+        
+        <div class="success">
+            <h4>✅ Fungerar perfekt:</h4>
+            <ul>
+                <li><strong>Excalidraw/Skiss</strong> - Full funktionalitet inklusive live-samarbete</li>
+                <li><strong>Enkla webbplatser</strong> - Statiska sidor utan avancerad säkerhet</li>
+                <li><strong>Open source-tjänster</strong> - Designade för delning och inkludering</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <h4>⚠️ Kan ha begränsningar:</h4>
+            <ul>
+                <li><strong>Kommersiella nyhetssajter</strong> (DN.se, SVT.se, etc.)</li>
+                <li><strong>Sociala medier</strong> (Facebook, Twitter, Instagram)</li>
+                <li><strong>Streaming-tjänster</strong> (Netflix, YouTube, etc.)</li>
+                <li><strong>Bank- och finanstjänster</strong></li>
+            </ul>
+        </div>
+        
+        <h2>🔧 Varför vissa tjänster blockerar proxy</h2>
+        
+        <div class="info">
+            <h4>Tekniska skäl:</h4>
+            <ul>
+                <li><strong>Bot-detektering:</strong> Upptäcker att förfrågningar kommer från servrar istället för webbläsare</li>
+                <li><strong>IP-baserad blockering:</strong> Datacenter-IP:er blockeras automatiskt</li>
+                <li><strong>Header-analys:</strong> Analyserar HTTP-headers för att upptäcka proxy</li>
+                <li><strong>JavaScript-kontroller:</strong> Kör test i webbläsaren för att upptäcka proxy-miljöer</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h4>Affärsskäl:</h4>
+            <ul>
+                <li><strong>Upphovsrätt:</strong> Förhindra obehörig omdelning av innehåll</li>
+                <li><strong>Reklamintäkter:</strong> Säkerställa att reklam visas korrekt</li>
+                <li><strong>Säkerhet:</strong> Skydda mot skadlig trafik och skrapning</li>
+                <li><strong>Licensavtal:</strong> Uppfylla geografiska begränsningar</li>
+            </ul>
+        </div>
+        
+        <h2>💡 Rekommendationer</h2>
+        
+        <div class="success">
+            <h4>För bästa resultat:</h4>
+            <ul>
+                <li>Använd systemet främst för <strong>samarbetsverktyg</strong> som Excalidraw</li>
+                <li>Testa nya tjänster innan de läggs till i produktionsmiljön</li>
+                <li>Ha alternativa åtkomstmetoder för kritiska webbplatser</li>
+                <li>Kontakta administratören om specifika tjänster behövs</li>
+            </ul>
+        </div>
+        
+        <h2>🛠️ Teknisk status</h2>
+        
+        <div class="info">
+            <p><strong>Proxy-systemet fungerar korrekt.</strong> Alla tekniska komponenter är operativa:</p>
+            <ul>
+                <li>✅ URL-anonymitet fungerar perfekt</li>
+                <li>✅ HTTP-proxy med URL-omskrivning</li>
+                <li>✅ WebSocket-stöd för realtidssamarbete</li>
+                <li>✅ Säkerhetsheaders optimerade</li>
+                <li>✅ Token-baserad säkerhet</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.location.href='/'" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                🏠 Tillbaka till huvudsidan
+            </button>
+        </div>
+    </div>
+</body>
+</html>

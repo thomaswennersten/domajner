@@ -1,0 +1,4 @@
+example.com
+company.com
+university.edu
+organization.org

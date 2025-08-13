@@ -1,0 +1,30 @@
+[
+  {
+    "id": "service1",
+    "name": "Excalidraw",
+    "url": "https://excalidraw.com",
+    "description": "Collaborative whiteboard tool",
+    "accessMode": "proxy"
+  },
+  {
+    "id": "service2",
+    "name": "Example News",
+    "url": "https://example-news.com",
+    "description": "News and articles",
+    "accessMode": "direct"
+  },
+  {
+    "id": "service3",
+    "name": "Miro",
+    "url": "https://miro.com",
+    "description": "Visual collaboration platform",
+    "accessMode": "proxy"
+  },
+  {
+    "id": "service4",
+    "name": "Company Intranet",
+    "url": "https://intranet.company.com",
+    "description": "Internal company portal",
+    "accessMode": "direct"
+  }
+]
