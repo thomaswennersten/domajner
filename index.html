@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-post Verifiering</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="email"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .admin-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .admin-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tjänståtkomst</h1>
+        <form id="accessForm">
+            <div class="form-group">
+                <label for="email">Ange din e-postadress:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="service">Välj tjänst:</label>
+                <select id="service" name="service" required>
+                    <option value="">Välj en tjänst...</option>
+                </select>
+            </div>
+            <button type="submit">Skicka åtkomstlänk</button>
+        </form>
+        <div id="message"></div>
+        <div class="admin-link">
+            <a href="admin.html">Administration</a>
+        </div>
+    </div>
+
+    <script>
+        // Load services when page loads
+        window.addEventListener('load', async function() {
+            await loadServices();
+        });
+
+        async function loadServices() {
+            try {
+                const response = await fetch('./api/services');
+                const result = await response.json();
+                
+                const serviceSelect = document.getElementById('service');
+                serviceSelect.innerHTML = '<option value="">Välj en tjänst...</option>';
+                
+                if (result.success && result.services.length > 0) {
+                    result.services.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.id;
+                        option.textContent = service.name + (service.description ? ' - ' + service.description : '');
+                        serviceSelect.appendChild(option);
+                    });
+                } else {
+                    serviceSelect.innerHTML = '<option value="">Inga tjänster tillgängliga</option>';
+                }
+            } catch (error) {
+                console.error('Error loading services:', error);
+                const serviceSelect = document.getElementById('service');
+                serviceSelect.innerHTML = '<option value="">Ett fel uppstod vid laddning av tjänster</option>';
+            }
+        }
+
+        document.getElementById('accessForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const serviceId = document.getElementById('service').value;
+            const messageDiv = document.getElementById('message');
+            
+            if (!serviceId) {
+                messageDiv.innerHTML = '<div class="message error">Du måste välja en tjänst.</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('./api/send-link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email, serviceId: serviceId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="message success">' + result.message + '</div>';
+                    // Clear form after successful submission
+                    document.getElementById('email').value = '';
+                    document.getElementById('service').value = '';
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod. Försök igen senare.</div>';
+            }
+        });
+    </script>
+</body>
+</html>

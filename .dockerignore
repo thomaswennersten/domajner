@@ -1,0 +1,82 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+SECURITY.md
+PROJECT_STRUCTURE.md
+docs/
+
+# Examples
+examples/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data (will be mounted as volumes)
+allowed_domains.txt
+services.json
+one_time_links.json
+verification_code.txt
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# CI/CD
+.github/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output/
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
