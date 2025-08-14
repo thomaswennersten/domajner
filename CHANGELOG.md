@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-08-13
+
+### Added
+- **Enhanced Direct Mode with URL Protection**: Direct Mode now uses secure iframe technology to hide target URLs
+- **Fullscreen Support**: Added fullscreen button for improved user experience in Direct Mode
+- **Secure Access Page**: New secure-access.html implementation for enhanced privacy
+- **Cross-browser Compatibility**: Full support for all major browsers' fullscreen APIs
+
+### Changed
+- Direct Mode implementation completely rewritten to prevent URL exposure
+- Improved user interface with modern fullscreen controls
+- Enhanced security for Direct Mode access
+
+### Security
+- Target URLs are now completely hidden from browser address bar in Direct Mode
+- Added protection against developer tools inspection
+- Improved iframe security with right-click prevention
+
 ## [1.0.0] - 2025-01-XX
 
 ### Added

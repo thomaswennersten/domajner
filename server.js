@@ -492,14 +492,18 @@ app.get('/access/:token', async (req, res) => {
         console.log(`Service ${linkData.serviceName} configured for ${accessMode} mode`);
         
         if (accessMode === 'direct') {
-            // Direct Mode: Mark as used and redirect directly to target URL
+            // Direct Mode: Mark as used and redirect to secure iframe page to hide URL
             const updatedLinks = links.map(link => 
                 link.token === token ? { ...link, used: true, usedAt: new Date().toISOString() } : link
             );
             await writeLinks(updatedLinks);
             
-            console.log(`Direct redirect to ${linkData.targetUrl}`);
-            return res.redirect(302, linkData.targetUrl);
+            // Redirect to secure-access.html with target URL and service name as parameters
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            const secureAccessUrl = `${baseUrl}/domajner/secure-access.html?target=${encodeURIComponent(linkData.targetUrl)}&service=${encodeURIComponent(linkData.serviceName)}`;
+            
+            console.log(`Direct mode: Redirecting to secure iframe page for ${linkData.targetUrl}`);
+            return res.redirect(302, secureAccessUrl);
             
         } else {
             // Proxy Mode: Redirect to proxy endpoint for URL anonymity

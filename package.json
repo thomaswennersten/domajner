@@ -1,6 +1,6 @@
 {
   "name": "domajner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Secure dual-mode email-based service access system",
   "main": "server.js",
   "scripts": {
