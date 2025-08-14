@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
+const multer = require('multer');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 require('dotenv').config();
 
@@ -24,6 +25,7 @@ const DOMAINS_FILE = path.join(__dirname, 'allowed_domains.txt');
 const CODE_FILE = path.join(__dirname, 'verification_code.txt');
 const SERVICES_FILE = path.join(__dirname, 'services.json');
 const LINKS_FILE = path.join(__dirname, 'one_time_links.json');
+const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 
 // SMTP Configuration
 const transporter = nodemailer.createTransport({
@@ -31,6 +33,31 @@ const transporter = nodemailer.createTransport({
     port: 25,
     secure: false,
     auth: false
+});
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'logo-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'));
+        }
+    }
 });
 
 // Initialize files if they don't exist
@@ -67,6 +94,23 @@ async function initializeFiles() {
         await fs.access(LINKS_FILE);
     } catch {
         await fs.writeFile(LINKS_FILE, JSON.stringify({ links: [] }, null, 2));
+    }
+    
+    try {
+        await fs.access(SETTINGS_FILE);
+    } catch {
+        const defaultSettings = {
+            pageTitle: 'Tjänståtkomst',
+            logoUrl: null
+        };
+        await fs.writeFile(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2));
+    }
+    
+    // Ensure uploads directory exists
+    try {
+        await fs.access('uploads');
+    } catch {
+        await fs.mkdir('uploads');
     }
 }
 
@@ -112,6 +156,27 @@ async function writeServices(services) {
         return true;
     } catch (error) {
         console.error('Error writing services file:', error);
+        return false;
+    }
+}
+
+// Settings helper functions
+async function readSettings() {
+    try {
+        const content = await fs.readFile(SETTINGS_FILE, 'utf-8');
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Error reading settings file:', error);
+        return { pageTitle: 'Tjänståtkomst', logoUrl: null };
+    }
+}
+
+async function writeSettings(settings) {
+    try {
+        await fs.writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+        return true;
+    } catch (error) {
+        console.error('Error writing settings file:', error);
         return false;
     }
 }
@@ -492,14 +557,18 @@ app.get('/access/:token', async (req, res) => {
         console.log(`Service ${linkData.serviceName} configured for ${accessMode} mode`);
         
         if (accessMode === 'direct') {
-            // Direct Mode: Mark as used and redirect directly to target URL
+            // Direct Mode: Mark as used and redirect to secure iframe page to hide URL
             const updatedLinks = links.map(link => 
                 link.token === token ? { ...link, used: true, usedAt: new Date().toISOString() } : link
             );
             await writeLinks(updatedLinks);
             
-            console.log(`Direct redirect to ${linkData.targetUrl}`);
-            return res.redirect(302, linkData.targetUrl);
+            // Redirect to secure-access.html with target URL and service name as parameters
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            const secureAccessUrl = `${baseUrl}/domajner/secure-access.html?target=${encodeURIComponent(linkData.targetUrl)}&service=${encodeURIComponent(linkData.serviceName)}`;
+            
+            console.log(`Direct mode: Redirecting to secure iframe page for ${linkData.targetUrl}`);
+            return res.redirect(302, secureAccessUrl);
             
         } else {
             // Proxy Mode: Redirect to proxy endpoint for URL anonymity
@@ -1125,6 +1194,133 @@ app.get('/api/admin/get-links', requireAuth, async (req, res) => {
         });
     }
 });
+
+// Settings API endpoints
+app.get('/api/settings', async (req, res) => {
+    try {
+        const settings = await readSettings();
+        res.json({ 
+            success: true, 
+            settings: settings 
+        });
+    } catch (error) {
+        console.error('Error reading settings:', error);
+        res.json({ 
+            success: false, 
+            message: 'Ett fel uppstod vid läsning av inställningar.' 
+        });
+    }
+});
+
+// Admin: Get settings
+app.get('/api/admin/get-settings', requireAuth, async (req, res) => {
+    try {
+        const settings = await readSettings();
+        res.json({ 
+            success: true, 
+            settings: settings 
+        });
+    } catch (error) {
+        console.error('Error reading settings:', error);
+        res.json({ 
+            success: false, 
+            message: 'Ett fel uppstod vid läsning av inställningar.' 
+        });
+    }
+});
+
+// Admin: Update settings (with file upload)
+app.post('/api/admin/settings', requireAuth, upload.single('logo'), async (req, res) => {
+    try {
+        const currentSettings = await readSettings();
+        const newSettings = { ...currentSettings };
+        
+        // Update page title if provided
+        if (req.body.pageTitle !== undefined) {
+            newSettings.pageTitle = req.body.pageTitle || 'Tjänståtkomst';
+        }
+        
+        // Handle logo upload
+        if (req.file) {
+            // Delete old logo file if it exists
+            if (currentSettings.logoUrl) {
+                try {
+                    const oldFilePath = path.join(__dirname, currentSettings.logoUrl);
+                    await fs.unlink(oldFilePath);
+                } catch (err) {
+                    console.warn('Could not delete old logo file:', err.message);
+                }
+            }
+            
+            // Set new logo URL
+            newSettings.logoUrl = `uploads/${req.file.filename}`;
+        }
+        
+        const success = await writeSettings(newSettings);
+        
+        if (success) {
+            res.json({ 
+                success: true, 
+                message: 'Inställningar sparade framgångsrikt!',
+                settings: newSettings
+            });
+        } else {
+            res.json({ 
+                success: false, 
+                message: 'Ett fel uppstod vid sparandet av inställningar.' 
+            });
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        res.json({ 
+            success: false, 
+            message: 'Ett fel uppstod vid sparandet av inställningar.' 
+        });
+    }
+});
+
+// Admin: Remove logo
+app.post('/api/admin/remove-logo', requireAuth, async (req, res) => {
+    try {
+        const currentSettings = await readSettings();
+        
+        // Delete logo file if it exists
+        if (currentSettings.logoUrl) {
+            try {
+                const filePath = path.join(__dirname, currentSettings.logoUrl);
+                await fs.unlink(filePath);
+            } catch (err) {
+                console.warn('Could not delete logo file:', err.message);
+            }
+        }
+        
+        // Update settings to remove logo URL
+        const newSettings = { ...currentSettings, logoUrl: null };
+        const success = await writeSettings(newSettings);
+        
+        if (success) {
+            res.json({ 
+                success: true, 
+                message: 'Logo borttagen framgångsrikt!',
+                settings: newSettings
+            });
+        } else {
+            res.json({ 
+                success: false, 
+                message: 'Ett fel uppstod vid borttagandet av logotypen.' 
+            });
+        }
+    } catch (error) {
+        console.error('Error removing logo:', error);
+        res.json({ 
+            success: false, 
+            message: 'Ett fel uppstod vid borttagandet av logotypen.' 
+        });
+    }
+});
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Catch-all route for undefined routes
 app.use('*', (req, res) => {

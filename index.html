@@ -18,10 +18,19 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #333;
+        .header {
             text-align: center;
             margin-bottom: 30px;
+        }
+        .logo {
+            max-height: 80px;
+            max-width: 200px;
+            margin-bottom: 15px;
+            display: none; /* Hidden by default */
+        }
+        h1 {
+            color: #333;
+            margin: 0;
         }
         .form-group {
             margin-bottom: 20px;
@@ -86,7 +95,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tjänståtkomst</h1>
+        <div class="header">
+            <img id="logo" class="logo" alt="Logo">
+            <h1 id="pageTitle">Tjänståtkomst</h1>
+        </div>
         <form id="accessForm">
             <div class="form-group">
                 <label for="email">Ange din e-postadress:</label>
@@ -107,9 +119,10 @@
     </div>
 
     <script>
-        // Load services when page loads
+        // Load services and settings when page loads
         window.addEventListener('load', async function() {
             await loadServices();
+            await loadSettings();
         });
 
         async function loadServices() {
@@ -134,6 +147,30 @@
                 console.error('Error loading services:', error);
                 const serviceSelect = document.getElementById('service');
                 serviceSelect.innerHTML = '<option value="">Ett fel uppstod vid laddning av tjänster</option>';
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const response = await fetch('./api/settings');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update page title if set
+                    if (result.settings.pageTitle) {
+                        document.getElementById('pageTitle').textContent = result.settings.pageTitle;
+                        document.title = result.settings.pageTitle;
+                    }
+                    
+                    // Show logo if set
+                    if (result.settings.logoUrl) {
+                        const logoImg = document.getElementById('logo');
+                        logoImg.src = result.settings.logoUrl;
+                        logoImg.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
             }
         }
 

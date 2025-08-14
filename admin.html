@@ -39,7 +39,7 @@
             font-weight: bold;
             color: #555;
         }
-        input[type="text"], textarea {
+        input[type="text"], input[type="url"], input[type="file"], textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -199,6 +199,33 @@
         </div>
 
         <div class="section">
+            <h2>Inställningar för GUI</h2>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label for="pageTitle">Rubrik på huvudsida:</label>
+                    <input type="text" id="pageTitle" name="pageTitle" placeholder="Tjänståtkomst">
+                </div>
+                <div class="form-group">
+                    <label for="logoFile">Ladda upp logo:</label>
+                    <input type="file" id="logoFile" name="logoFile" accept="image/*">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Rekommenderat: PNG eller JPG, max 200x80 pixlar
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="currentLogo">Nuvarande logo:</label>
+                    <div id="currentLogoPreview" style="margin-top: 10px;">
+                        <em>Ingen logo uppladdad</em>
+                    </div>
+                </div>
+                <button type="submit">Spara inställningar</button>
+                <button type="button" onclick="loadSettings()">Ladda nuvarande inställningar</button>
+                <button type="button" onclick="removeLogo()">Ta bort logo</button>
+            </form>
+            <div id="settingsMessage"></div>
+        </div>
+
+        <div class="section">
             <h2>Aktiva engångslänkar</h2>
             <button type="button" onclick="loadLinks()">Uppdatera lista</button>
             <div id="linksList" style="margin-top: 20px;"></div>
@@ -236,6 +263,7 @@
                     loadDomains(); // Load domains when admin section becomes visible
                     loadServices(); // Load services
                     loadLinks(); // Load active links
+                    loadSettings(); // Load GUI settings
                 } else {
                     messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
                 }
@@ -545,6 +573,86 @@
                 }
             } catch (error) {
                 messageDiv.innerHTML = '<div class="message error">Ett fel uppstod: ' + error.message + '</div>';
+            }
+        }
+
+        // Settings functionality
+        document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageDiv = document.getElementById('settingsMessage');
+            const pageTitle = document.getElementById('pageTitle').value;
+            const logoFile = document.getElementById('logoFile').files[0];
+            
+            try {
+                const formData = new FormData();
+                formData.append('pageTitle', pageTitle);
+                if (logoFile) {
+                    formData.append('logo', logoFile);
+                }
+                
+                const response = await fetch('/domajner/api/admin/settings', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="message success">Inställningar sparade framgångsrikt!</div>';
+                    loadSettings(); // Reload to show changes
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">Ett fel uppstod: ' + error.message + '</div>';
+            }
+        });
+
+        async function loadSettings() {
+            try {
+                const response = await fetch('/domajner/api/admin/get-settings');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update form fields
+                    document.getElementById('pageTitle').value = result.settings.pageTitle || 'Tjänståtkomst';
+                    
+                    // Update logo preview
+                    const logoPreview = document.getElementById('currentLogoPreview');
+                    if (result.settings.logoUrl) {
+                        logoPreview.innerHTML = `<img src="${result.settings.logoUrl}" alt="Current logo" style="max-height: 80px; max-width: 200px; border: 1px solid #ddd; border-radius: 4px;">`;
+                    } else {
+                        logoPreview.innerHTML = '<em>Ingen logo uppladdad</em>';
+                    }
+                } else {
+                    console.error('Could not load settings:', result.message);
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        async function removeLogo() {
+            const messageDiv = document.getElementById('settingsMessage');
+            
+            if (confirm('Är du säker på att du vill ta bort logotypen?')) {
+                try {
+                    const response = await fetch('/domajner/api/admin/remove-logo', {
+                        method: 'POST'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        messageDiv.innerHTML = '<div class="message success">Logo borttagen framgångsrikt!</div>';
+                        loadSettings(); // Reload to show changes
+                    } else {
+                        messageDiv.innerHTML = '<div class="message error">' + result.message + '</div>';
+                    }
+                } catch (error) {
+                    messageDiv.innerHTML = '<div class="message error">Ett fel uppstod: ' + error.message + '</div>';
+                }
             }
         }
 

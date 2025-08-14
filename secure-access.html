@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Säker Tjänståtkomst</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            position: relative;
+        }
+        
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .security-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .fullscreen-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .service-frame {
+            width: 100%;
+            height: calc(100vh - 60px);
+            border: none;
+            background: white;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="service-info">
+            <span>🔐</span>
+            <span id="serviceName">Laddar tjänst...</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="security-badge">
+                <span>🛡️</span>
+                <span>Säker Anslutning</span>
+            </div>
+            <button class="fullscreen-btn" onclick="toggleFullscreen()" id="fullscreenBtn">
+                <span>⛶</span>
+                <span>Fullskärm</span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Laddar säker tjänst...</p>
+    </div>
+    
+    <iframe id="serviceFrame" class="service-frame" style="display: none;"></iframe>
+
+    <script>
+        // Get target URL from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get('target');
+        const serviceName = urlParams.get('service') || 'Tjänst';
+        
+        // Update service name in header
+        document.getElementById('serviceName').textContent = serviceName;
+        
+        if (targetUrl) {
+            // Load the service in iframe after a short delay
+            setTimeout(() => {
+                const iframe = document.getElementById('serviceFrame');
+                const loading = document.getElementById('loading');
+                
+                iframe.src = targetUrl;
+                
+                // Hide loading screen when iframe loads
+                iframe.onload = () => {
+                    loading.style.display = 'none';
+                    iframe.style.display = 'block';
+                };
+                
+                // Fallback: hide loading after 5 seconds even if iframe doesn't load
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    iframe.style.display = 'block';
+                }, 5000);
+                
+            }, 1500);
+        } else {
+            // No target URL provided
+            document.getElementById('loading').innerHTML = 
+                '<h3>❌ Fel</h3><p>Ogiltig åtkomstlänk</p>';
+        }
+        
+        // Prevent right-click and other ways to inspect the iframe source
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Prevent F12 developer tools
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+            }
+        });
+        
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            const iframe = document.getElementById('serviceFrame');
+            const btn = document.getElementById('fullscreenBtn');
+            
+            if (!document.fullscreenElement) {
+                // Enter fullscreen
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.mozRequestFullScreen) {
+                    iframe.mozRequestFullScreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+                btn.innerHTML = '<span>⤓</span><span>Avsluta</span>';
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                btn.innerHTML = '<span>⛶</span><span>Fullskärm</span>';
+            }
+        }
+        
+        // Listen for fullscreen changes to update button text
+        document.addEventListener('fullscreenchange', function() {
+            const btn = document.getElementById('fullscreenBtn');
+            if (document.fullscreenElement) {
+                btn.innerHTML = '<span>⤓</span><span>Avsluta</span>';
+            } else {
+                btn.innerHTML = '<span>⛶</span><span>Fullskärm</span>';
+            }
+        });
+    </script>
+</body>
+</html>
