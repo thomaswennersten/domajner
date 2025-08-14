@@ -4,9 +4,9 @@ A secure, dual-mode web service access system that provides one-time authenticat
 
 ## 🌟 Features
 
-### Dual Access Modes
-- **🔒 Proxy Mode**: Complete URL anonymity with transparent proxying
-- **🔗 Direct Mode**: Secure iframe access with complete URL protection *(NEW in v1.1.0)*
+### Dual Access Modes *(Both Fully Working in v1.2.0!)*
+- **🔒 Proxy Mode**: Complete URL anonymity with transparent proxying *(FIXED in v1.2.0)*
+- **🔗 Direct Mode**: Secure iframe access with complete URL protection
 
 ### Security Features *(Enhanced in v1.1.0)*
 - Email domain verification
@@ -17,7 +17,8 @@ A secure, dual-mode web service access system that provides one-time authenticat
 - **Enhanced iframe security with developer tools protection** *(NEW)*
 
 ### Technical Capabilities
-- WebSocket proxying for real-time collaboration tools
+- **Complete proxy implementation with URL rewriting** *(FIXED in v1.2.0)*
+- **WebSocket proxying for real-time collaboration tools** *(WORKING in v1.2.0)*
 - Static resource rewriting for proper proxy functionality
 - Responsive admin interface
 - **Fullscreen support with cross-browser compatibility** *(NEW in v1.1.0)*
