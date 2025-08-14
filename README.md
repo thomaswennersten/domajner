@@ -2,6 +2,32 @@
 
 A secure, dual-mode web service access system that provides one-time authenticated links via email verification.
 
+DEMO: https://vibecoder-sambruk-u917.vm.elestio.app/demo-domajner/index.html
+
+  Hur engångslänkarna fungerar:
+
+  1. Första klicket (från e-post):
+  - Länken markeras som "använd" i databasen (used: true)
+  - Användaren omdirigeras till tjänsten via proxy/iframe
+  - Detta förhindrar att samma e-postlänk kan användas flera gånger
+
+  2. Kopierad länk (manuell delning):
+  - URL:en innehåller samma token som fortfarande är giltig
+  - Proxy-systemet låter redan "använda" tokens fortsätta fungera inom sessionen
+  - Så länge token inte har gått ut (30 min) fungerar kopierade länkar
+
+  Varför denna design?
+
+  Säkerhetsfördelar:
+  - E-post säkerhet: Förhindrar återanvändning om e-post komprometteras
+  - Begränsad spridning: Länkar kan inte vidarebefordras obegränsat via e-post
+  - Tidsbegränsning: Alla länkar går ut efter 30 minuter oavsett användning
+
+  Användbarhet:
+  - Session-fortsättning: Samma person kan fortsätta använda tjänsten
+  - Delning: Kan dela aktiv session med kollegor vid behov
+  - Flexibilitet: Balans mellan säkerhet och praktisk användning
+
 ## 🌟 Features
 
 ### Dual Access Modes *(Both Fully Working in v1.2.0!)*
